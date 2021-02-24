@@ -1,5 +1,5 @@
 async function main() {
-  const address = "0x89fAE03A109b214E5a9c912D6c69eAb21CC1fa40";
+  const address = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
   const ArtworkFactory = await ethers.getContractFactory("ArtworkFactory");
   const artworkFactory = await ArtworkFactory.attach(address);
 

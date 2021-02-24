@@ -3,15 +3,12 @@ async function main() {
   const ArtworkFactory = await ethers.getContractFactory("ArtworkFactory");
   const artworkFactory = await ArtworkFactory.attach(address);
 
-  await artworkFactory.buyArtwork("0x01", {
-    value: ethers.utils.parseEther("2"),
-  });
+  await artworkFactory.setPrice("0x02", ethers.utils.parseEther("4"));
 
   let triggerPromise = new Promise((resolve, reject) => {
-    artworkFactory.on("ArtworkSold", function (artworkId, newOwner, oldOwner) {
+    artworkFactory.on("ArtworkPriceSet", function (artworkId, price) {
       console.log("artworkId", artworkId);
-      console.log("artist", newOwner);
-      console.log("artist", oldOwner);
+      console.log("price", price);
       resolve();
     });
 

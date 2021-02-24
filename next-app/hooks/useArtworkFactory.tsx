@@ -1,40 +1,26 @@
-import { useWeb3React } from "@web3-react/core";
-import { ethers } from "ethers";
-import { useEffect } from "react";
-import ArtworkABI from "../abis/artwork-factory";
+import * as ArtworkABI from "../abis/ArtworkFactory.json";
 import useContract from "./useContract";
 
-const address = "0x89fAE03A109b214E5a9c912D6c69eAb21CC1fa40";
+const address = "0x78A781644AB3137968f39aD4a389D226C3f3C3C9";
 
 export function useArtworkFactory() {
-  const { account } = useWeb3React();
-  const { getContract } = useContract();
-  let artworkFactory: ethers.Contract;
+  const { loading, contract } = useContract(address, ArtworkABI.abi);
 
-  useEffect(() => {
-    const init = async () => {
-      artworkFactory = await getContract(address, ArtworkABI.abi);
-    };
-    if (account) init();
-  }, [account]);
-
-  useEffect(() => {
-    if (!artworkFactory) return;
-    artworkFactory.on("ArtworkCreated", (artworkId, artist) => {
-      console.log("artwork created", artworkId);
-    });
-  }, [artworkFactory]);
+  //QmbVjBa3vgdyVqzmK896QSu3hsEkqMGjFuuTRwgK3RNVaD
 
   const createArtwork = async (uri: string, price: number) => {
-    if (!artworkFactory) return;
-    await artworkFactory.createArtwork(uri, price);
+    if (loading) console.log("Contract is loading");
+    const tx = await contract.createArtwork(uri, price);
+    const res = await tx.wait();
+    console.log("Artwork minted!", res);
   };
 
-  const getOwner = async () => {
-    const owner = await artworkFactory.owner();
-    console.log("owner is", owner);
-    return owner;
+  const getPlatform = async () => {
+    if (loading) console.log("Contract is loading");
+    const platform = await contract.platform();
+    console.log("Platform is", platform);
+    return platform;
   };
 
-  return { createArtwork, getOwner };
+  return { createArtwork, getPlatform };
 }

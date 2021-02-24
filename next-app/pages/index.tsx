@@ -9,5 +9,9 @@ export default function Home() {
   const triedEager = useEagerConnect();
   const artwork = useArtworkFactory();
 
-  return <NewArtwork />;
+  if (triedEager) {
+    return <NewArtwork />;
+  } else {
+    return <div>Loading</div>;
+  }
 }

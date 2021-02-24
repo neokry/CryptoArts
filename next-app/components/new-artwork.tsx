@@ -24,7 +24,7 @@ export default function NewArtwork() {
       image: data.image[0],
     };
     const tokenURI = await upload(metaData);
-    await await createArtwork(tokenURI, data.price);
+    await createArtwork(tokenURI, data.price);
   };
 
   return (

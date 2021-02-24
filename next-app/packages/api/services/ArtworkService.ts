@@ -1,9 +1,9 @@
 import ContractRepository from "../store/ContractRepository";
-import ArtworkFactory from "../../../abis/artwork-factory";
+import * as ArtworkFactory from "../../../abis/ArtworkFactory.json";
 import { BigNumber } from "ethers";
 import axios from "axios";
 
-const ContractAddress = "0x89fAE03A109b214E5a9c912D6c69eAb21CC1fa40";
+const ContractAddress = "0x78A781644AB3137968f39aD4a389D226C3f3C3C9";
 
 export default function ArtworkService() {
   const { getContract } = ContractRepository(

@@ -7,13 +7,15 @@ export function useEagerConnect() {
   const [tried, setTried] = useState(false);
 
   const init = async () => {
-    try {
-      console.log("Loading connection...");
-      await activate(injected, undefined, true);
-      setTried(true);
-    } catch (err) {
-      console.log("Error loading connection", err);
-    }
+    console.log("Loading connection...");
+    await activate(
+      injected,
+      (err) => {
+        console.log("Error loading connection", err);
+      },
+      true
+    );
+    setTried(true);
   };
 
   useEffect(() => {
