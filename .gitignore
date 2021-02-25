@@ -8,3 +8,5 @@ hardhat/cache
 .vscode
 
 */.env
+
+subgraph

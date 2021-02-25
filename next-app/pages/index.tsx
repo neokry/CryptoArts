@@ -1,17 +1,26 @@
-import { useWeb3React } from "@web3-react/core";
-import { useEffect } from "react";
-import NewArtwork from "../components/new-artwork";
-import { useArtworkFactory } from "../hooks/useArtworkFactory";
-import { useEagerConnect } from "../hooks/useEgarConnection";
+import { gql, useQuery } from "@apollo/client";
+import { Artwork } from "../components/artwork";
+import { ArtworkFeed } from "../components/artwork-feed";
+
+const EXPLORE_QUERY = gql`
+  query GetArtworks {
+    artworks {
+      id
+      artist
+      owner
+      currentPrice
+      image
+      name
+    }
+  }
+`;
 
 export default function Home() {
-  const context = useWeb3React();
-  const triedEager = useEagerConnect();
-  const artwork = useArtworkFactory();
+  const { loading, error, data } = useQuery(EXPLORE_QUERY);
+  if (loading) return <div></div>;
+  if (error) return <div>Error: {error}</div>;
 
-  if (triedEager) {
-    return <NewArtwork />;
-  } else {
-    return <div>Loading</div>;
-  }
+  console.log("data", data);
+
+  return <ArtworkFeed artworks={data.artworks} />;
 }
