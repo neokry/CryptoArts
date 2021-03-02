@@ -9,7 +9,7 @@ async function main() {
 
   await artworkFactory.deployed();
 
-  //0x78A781644AB3137968f39aD4a389D226C3f3C3C9
+  //0x486E861222532f6eE5f4d3F87aa52Cb3cA52E090
   console.log("Artwork factory deployed to:", artworkFactory.address);
 
   const platform = await artworkFactory.platform();

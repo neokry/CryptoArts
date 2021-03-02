@@ -11,6 +11,7 @@ const EXPLORE_QUERY = gql`
       currentPrice
       image
       name
+      soldPriceHistory
     }
   }
 `;

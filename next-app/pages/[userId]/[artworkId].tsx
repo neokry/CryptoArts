@@ -1,8 +1,10 @@
 import { gql, useQuery } from "@apollo/client";
 import { useWeb3React } from "@web3-react/core";
+import { BigNumber, ethers } from "ethers";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { useArtworkFactory } from "../../hooks/useArtworkFactory";
 import ArtworkData from "../../models/ArtworkData";
 
 const SINGLE_ARTWORK = gql`
@@ -15,6 +17,7 @@ const SINGLE_ARTWORK = gql`
       image
       name
       description
+      soldPriceHistory
     }
   }
 `;
@@ -37,7 +40,8 @@ export default function UserArtwork() {
   }, [artworkId]);
 
   useEffect(() => {
-    if (account && account.localeCompare(userId as string)) setIsOwner(true);
+    if (account && account.toLowerCase().localeCompare(userId as string) == 0)
+      setIsOwner(true);
   }, [account, userId]);
 
   const { loading, error, data } = useQuery(SINGLE_ARTWORK, {
@@ -48,7 +52,19 @@ export default function UserArtwork() {
   if (loading || !data) return <div></div>;
 
   const artwork: ArtworkData = data.artworks[0];
-  const { image, name, artist, currentPrice, description } = artwork;
+  const {
+    image,
+    name,
+    artist,
+    currentPrice,
+    description,
+    id,
+    owner,
+    soldPriceHistory,
+  } = artwork;
+  const priceInEth = ethers.utils.formatEther(currentPrice);
+
+  console.log("price", currentPrice == 0);
 
   return (
     <div>
@@ -68,16 +84,83 @@ export default function UserArtwork() {
           <Link href={"/" + artist}>
             <p className="text-gray-600 text-xl cursor-pointer">{artist}</p>
           </Link>
+          <p className="mt-8 font-bold">Owner</p>
+          <Link href={"/" + owner}>
+            <p className="text-gray-600 text-xl cursor-pointer">{owner}</p>
+          </Link>
         </div>
         <div className="w-1/2">
-          <BuyWidget currentPrice={currentPrice} isOwner={isOwner} />
+          {currentPrice == 0 ? (
+            <ListWidget
+              artworkId={id}
+              isOwner={isOwner}
+              soldPriceHistory={soldPriceHistory}
+            />
+          ) : (
+            <BuyWidget
+              currentPrice={priceInEth.toString()}
+              isOwner={isOwner}
+              artworkId={id}
+            />
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function BuyWidget({ currentPrice, isOwner }) {
+function ListWidget({ artworkId, isOwner, soldPriceHistory }) {
+  const [listPrice, setListPrice] = useState("");
+  const { setArtworkPrice } = useArtworkFactory();
+  const lastSold = ethers.utils.formatEther(
+    soldPriceHistory[soldPriceHistory.length - 1]
+  );
+
+  return (
+    <div className="w-full shadow-lg rounded-xl p-4 border">
+      {isOwner ? (
+        <>
+          <div className="flex items-baseline">
+            <p className="font-bold mr-2">List For:</p>
+            <span className="text-gray-600">$</span>
+            <input
+              className="focus:outline-none text-gray-600"
+              placeholder="100"
+              type="text"
+              value={listPrice}
+              onChange={(e) => setListPrice(e.target.value)}
+            />
+          </div>
+          <button
+            type="button"
+            className="w-full mt-4"
+            onClick={() => setArtworkPrice(artworkId, +listPrice)}
+          >
+            <div className="flex items-center justify-center p-4 w-full bg-blue-400 text-white rounded-lg">
+              <p className="font-bold text-4xl">List Artwork</p>
+            </div>
+          </button>
+        </>
+      ) : (
+        <>
+          <div className="flex items-baseline">
+            <p className="font-bold mr-2">Last Sold For:</p>
+            <span className="text-gray-600">${lastSold}</span>
+          </div>
+          <div className="w-full mt-4">
+            <div className="flex items-center justify-center p-4 w-full bg-gray-400 text-white rounded-lg">
+              <p className="font-bold text-4xl">Not For Sale</p>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function BuyWidget({ currentPrice, isOwner, artworkId }) {
+  const { setArtworkPrice, buyArtwork } = useArtworkFactory();
+
   return (
     <div className="w-full shadow-lg rounded-xl p-4 border">
       <div className="flex items-baseline">
@@ -86,13 +169,21 @@ function BuyWidget({ currentPrice, isOwner }) {
       </div>
 
       {isOwner ? (
-        <div className="w-full mt-4">
+        <button
+          type="button"
+          className="w-full mt-4"
+          onClick={async () => await setArtworkPrice(artworkId, 0)}
+        >
           <div className="flex items-center justify-center p-4 w-full bg-red-400 text-white rounded-lg">
             <p className="font-bold text-4xl">Unlist This Artwork</p>
           </div>
-        </div>
+        </button>
       ) : (
-        <button className="w-full mt-4">
+        <button
+          className="w-full mt-4"
+          type="button"
+          onClick={async () => await buyArtwork(artworkId, currentPrice)}
+        >
           <div className="flex items-center justify-center p-4 w-full bg-blue-400 text-white rounded-lg">
             <p className="font-bold text-4xl">Buy Now</p>
           </div>

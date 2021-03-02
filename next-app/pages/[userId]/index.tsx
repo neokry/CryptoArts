@@ -5,16 +5,32 @@ import { useEffect, useState } from "react";
 import { gql, useQuery } from "@apollo/client";
 import { Artwork } from "../../components/artwork";
 import { ArtworkFeed } from "../../components/artwork-feed";
+import { Title } from "../../components/title";
 
 const USER_ARTWORKS = gql`
   query GetArtworks($userId: Bytes!) {
-    artworks(artist: $userId) {
+    artworks(where: { artist: $userId }) {
       id
       artist
       owner
       currentPrice
       image
       name
+      soldPriceHistory
+    }
+  }
+`;
+
+const USER_COLLECTION = gql`
+  query GetCollection($userId: Bytes!) {
+    artworks(where: { owner: $userId }) {
+      id
+      artist
+      owner
+      currentPrice
+      image
+      name
+      soldPriceHistory
     }
   }
 `;
@@ -32,11 +48,15 @@ export default function UserProfile() {
     if (account == userId) setIsUser(true);
   }, [account, userId]);
 
-  const { loading, error, data } = useQuery(USER_ARTWORKS, {
+  const getArtworks = useQuery(USER_ARTWORKS, {
     variables: { userId },
   });
 
-  let artworks;
+  const getCollection = useQuery(USER_COLLECTION, {
+    variables: { userId },
+  });
+
+  console.log("art", getArtworks.data);
 
   return (
     <div>
@@ -49,7 +69,27 @@ export default function UserProfile() {
         )}
       </div>
       <div className="mt-6">
-        {data && <ArtworkFeed artworks={data.artworks} />}
+        {getArtworks.data && getArtworks.data.artworks.length > 0 && (
+          <>
+            <div className="ml-4">
+              <Title title="My Artworks" />
+            </div>
+
+            <ArtworkFeed artworks={getArtworks.data.artworks} />
+          </>
+        )}
+      </div>
+
+      <div className="mt-6">
+        {getCollection.data && getCollection.data.artworks.length > 0 && (
+          <>
+            <div className="ml-4">
+              <Title title="My Collection" />
+            </div>
+
+            <ArtworkFeed artworks={getCollection.data.artworks} />
+          </>
+        )}
       </div>
     </div>
   );

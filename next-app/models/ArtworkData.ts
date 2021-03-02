@@ -3,6 +3,8 @@ export default interface ArtworkData {
   image: string;
   name: string;
   artist: string;
+  owner: string;
   currentPrice: number;
   description: string;
+  soldPriceHistory: number[];
 }

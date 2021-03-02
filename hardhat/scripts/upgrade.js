@@ -3,7 +3,7 @@ const { upgrades } = require("hardhat");
 async function main() {
   const ArtworkFactory = await ethers.getContractFactory("ArtworkFactory");
   const artworkFactory = await upgrades.upgradeProxy(
-    "0x78A781644AB3137968f39aD4a389D226C3f3C3C9",
+    "0x1Efc53c3ABFfDA3795CDa6fa59C458A4C0b557f8",
     ArtworkFactory
   );
 

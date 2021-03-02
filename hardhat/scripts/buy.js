@@ -1,10 +1,19 @@
+require("ethers");
+
 async function main() {
-  const address = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
+  const address = "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e";
   const ArtworkFactory = await ethers.getContractFactory("ArtworkFactory");
   const artworkFactory = await ArtworkFactory.attach(address);
+  const [owner, addr1] = await ethers.getSigners();
 
-  await artworkFactory.buyArtwork("0x01", {
-    value: ethers.utils.parseEther("2"),
+  const price = await artworkFactory.getPrice("0x01");
+  console.log("price", price);
+  const hex = price.toHexString();
+  const wei = price;
+  console.log("wei", wei);
+
+  await artworkFactory.connect(addr1).buyArtwork("0x01", {
+    value: wei,
   });
 
   let triggerPromise = new Promise((resolve, reject) => {
@@ -17,7 +26,7 @@ async function main() {
 
     setTimeout(() => {
       reject(new Error("timeout while waiting for event"));
-    }, 30000);
+    }, 100000);
   });
 
   await triggerPromise;
